@@ -740,13 +740,11 @@
 
         // Copia resumo estilizado para o WhatsApp
         function shareResult() {
-            const stats = getStats();
-            const shareText = `🌡️💘 *Termômetro de Compatibilidade: Bia & Vilton*\n\n` +
-                `📊 *Placar Oficial:* ${stats.points} de ${stats.totalQuestions} pontos (*${stats.percentage}% de sintonia!*)\n` +
-                `💚 *Deu Match:* 32 perguntas (incluindo gatos, praia, viajar de carro, dividir comida e beijar no 1º encontro!)\n` +
-                `⚡ *Oposto Perfeito:* Vilton toma o primeiro passo e Bia espera a iniciativa!\n` +
-                `🚨 *Obs:* ${isSimulated ? 'Modo simulado ativado (+2 pts)!' : 'A Bia perdeu -1 ponto porque pulou a pergunta #38 da balada 👀'}\n\n` +
-                `Veredito: "Basicamente a mesma pessoa" com o equilíbrio perfeito! ❤️✨`;
+            const shareText = `💖 *Relatório de Compatibilidade — Bia & Vilton* 🌡️💘❤️
+
+💕 O resultado oficial do seu teste de compatibilidade já está disponível para consulta! 💓✨ Acesse o link abaixo para visualizar o placar completo e a análise detalhada das respostas: 💝💞
+
+🔗 [https://viltonpl.github.io/termometro/](https://viltonpl.github.io/termometro/) ❤️🧡💛💚💙💜`;
 
             const textArea = document.createElement("textarea");
             textArea.value = shareText;
