@@ -114,6 +114,25 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #FB7185;
         }
+
+        #live-canvas {
+            touch-action: none;
+            cursor: crosshair;
+            background: linear-gradient(135deg, #fff7f9, #fff);
+        }
+
+        .live-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 60;
+            animation: liveHeartFall 1.8s ease-out forwards;
+        }
+
+        @keyframes liveHeartFall {
+            0% { transform: translateY(-10vh) rotate(-12deg) scale(0.7); opacity: 0; }
+            15% { opacity: 1; }
+            100% { transform: translateY(105vh) rotate(25deg) scale(1.25); opacity: 0; }
+        }
     </style>
 </head>
 <body class="font-sans text-slate-800 min-h-screen flex flex-col justify-between relative selection:bg-coral selection:text-white">
@@ -311,6 +330,92 @@
                         <span>Ver todas as 47 respostas</span>
                         <span>👇</span>
                     </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO AO VIVO: Firebase Realtime Database -->
+        <section id="espaco-ao-vivo" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-48 h-48 bg-pink-300/20 rounded-full blur-3xl"></div>
+            <div class="relative flex flex-col gap-4 border-b border-pink-100 pb-5">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100 text-softPurple text-[11px] font-bold uppercase tracking-wider mb-2">
+                            <span>💞 Conexão em tempo real</span>
+                        </span>
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-slate-900">Espaço Ao Vivo: Bia & Vilton</h2>
+                        <p id="firebase-status" class="text-xs sm:text-sm text-slate-500 mt-1">Preparando a conexão segura...</p>
+                    </div>
+                    <div class="shrink-0">
+                        <span class="text-xs font-bold text-slate-500 block mb-2">Quem está acessando?</span>
+                        <div class="inline-flex rounded-xl bg-slate-100 p-1" role="group" aria-label="Escolha sua identidade">
+                            <button id="identity-vilton" type="button" onclick="selectIdentity('Vilton')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all">Vilton</button>
+                            <button id="identity-bia" type="button" onclick="selectIdentity('Bia')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all">Bia</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                    <span id="presence-bia" class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-500">Bia está offline ⚪</span>
+                    <span id="presence-vilton" class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-500">Vilton está offline ⚪</span>
+                </div>
+            </div>
+
+            <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="rounded-2xl bg-rose-50/80 border border-rose-200 p-4 space-y-3">
+                    <div>
+                        <h3 class="font-bold text-roseDeep text-sm">💃 Pergunta #38 desbloqueável</h3>
+                        <p class="text-xs text-slate-600 mt-1">Dançar com uma paixão em uma balada lotada ou uma dança lenta em particular?</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button type="button" data-live-answer="Dançar com uma paixão em uma balada lotada" onclick="saveLiveAnswer(this.dataset.liveAnswer)" class="live-answer-btn px-3 py-2.5 rounded-xl bg-white border border-rose-200 text-xs font-bold text-slate-700 hover:border-roseDeep hover:text-roseDeep transition-all">Balada lotada</button>
+                        <button type="button" data-live-answer="Uma dança lenta em particular" onclick="saveLiveAnswer(this.dataset.liveAnswer)" class="live-answer-btn px-3 py-2.5 rounded-xl bg-white border border-rose-200 text-xs font-bold text-slate-700 hover:border-roseDeep hover:text-roseDeep transition-all">Dança lenta em particular</button>
+                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <p id="live-answer-status" class="text-[11px] text-slate-500">Aguardando a resposta da Bia...</p>
+                        <button type="button" onclick="resetLiveAnswer()" class="text-[11px] font-bold text-roseDeep hover:underline">Resetar</button>
+                    </div>
+                </div>
+                <div class="rounded-2xl bg-pink-50/80 border border-pink-200 p-4 flex flex-col justify-between gap-3">
+                    <div>
+                        <h3 class="font-bold text-roseDeep text-sm">💖 Mandar carinho ao vivo</h3>
+                        <p class="text-xs text-slate-600 mt-1">A outra pessoa verá uma chuva de corações imediatamente.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="button" onclick="sendLiveHearts()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-roseDeep to-coral text-white text-xs font-bold shadow-md hover:-translate-y-0.5 transition-all">Mandar carinho para <span id="heart-target">Bia</span> 💖</button>
+                        <span class="text-xs font-bold text-roseDeep">💕 <span id="hearts-count">0</span> carinhos enviados</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative grid grid-cols-1 lg:grid-cols-5 gap-5">
+                <div class="lg:col-span-3 rounded-2xl bg-white/80 border border-purple-100 p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h3 class="font-bold text-softPurple text-sm">🎨 Quadro de rabiscos & recados</h3>
+                            <p class="text-[11px] text-slate-500">Desenhem juntos em tempo real.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-[11px] font-bold text-slate-500" for="live-color">Cor</label>
+                            <select id="live-color" class="rounded-lg border border-pink-200 px-2 py-1 text-xs font-bold text-slate-700">
+                                <option value="#fb7185">Rosa</option>
+                                <option value="#e11d48">Vermelho</option>
+                                <option value="#9333ea">Roxo</option>
+                                <option value="#ffffff">Branco</option>
+                            </select>
+                            <button type="button" onclick="clearLiveCanvas()" class="rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-bold text-slate-600 hover:border-roseDeep hover:text-roseDeep">Limpar</button>
+                        </div>
+                    </div>
+                    <canvas id="live-canvas" class="w-full h-64 rounded-xl border border-pink-100" aria-label="Quadro compartilhado para desenhos"></canvas>
+                </div>
+                <div class="lg:col-span-2 rounded-2xl bg-rose-50/60 border border-rose-100 p-4 space-y-3">
+                    <h3 class="font-bold text-roseDeep text-sm">💌 Deixe um bilhete</h3>
+                    <form id="live-note-form" class="space-y-2">
+                        <input id="live-note-message" maxlength="240" required placeholder="Escreva uma mensagem..." class="w-full rounded-xl border border-pink-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-roseDeep">
+                        <button type="submit" class="w-full rounded-xl bg-white border border-pink-200 px-3 py-2.5 text-xs font-bold text-roseDeep hover:bg-pink-50 transition-colors">Publicar bilhete 💞</button>
+                    </form>
+                    <div id="live-notes" class="max-h-52 overflow-y-auto space-y-2 pr-1">
+                        <p class="text-xs text-slate-400 italic">Nenhum bilhete ainda.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -556,7 +661,10 @@
         // Se simular sem penalidade e com match na #38: 33 de 47 (~70%)
         function getStats() {
             const totalQuestions = qaData.length; // 47
-            const points = isSimulated ? 33 : 31;
+            const liveAnswer = window.liveQuestion38Answer;
+            const points = liveAnswer
+                ? (liveAnswer === qaData[37].vilton ? 33 : 32)
+                : (isSimulated ? 33 : 31);
             const percentage = Math.round((points / totalQuestions) * 100);
             return { points, totalQuestions, percentage };
         }
@@ -571,15 +679,19 @@
             const wrapper = document.getElementById('thermometer-wrapper');
 
             const stats = getStats();
-            pointsSubtitle.innerText = isSimulated
-                ? `${stats.points} de ${stats.totalQuestions} pontos (Simulação sem penalidade ✨)`
-                : `${stats.points} de ${stats.totalQuestions} pontos líquidos (32 matches - 1 penalidade)`;
+            pointsSubtitle.innerText = window.liveQuestion38Answer
+                ? `${stats.points} de ${stats.totalQuestions} pontos (Pergunta #38 respondida ao vivo 💞)`
+                : (isSimulated
+                    ? `${stats.points} de ${stats.totalQuestions} pontos (Simulação sem penalidade ✨)`
+                    : `${stats.points} de ${stats.totalQuestions} pontos líquidos (32 matches - 1 penalidade)`);
 
-            statusBadge.innerText = isSimulated
-                ? "Sintonia Turbinada (+2 pts recuperados!) 🚀"
-                : "Sintonia Alta & Equilibrada 🔥";
+            statusBadge.innerText = window.liveQuestion38Answer
+                ? (stats.points === 33 ? "Sintonia Turbinada (+2 pts recuperados!) 🚀" : "Sintonia em equilíbrio (+1 pt recuperado!) ✨")
+                : (isSimulated
+                    ? "Sintonia Turbinada (+2 pts recuperados!) 🚀"
+                    : "Sintonia Alta & Equilibrada 🔥");
 
-            bulbEmoji.innerText = isSimulated ? "😍" : "💘";
+            bulbEmoji.innerText = stats.points === 33 ? "😍" : "💘";
 
             // Sobe o líquido no tubo
             mercuryFill.style.height = targetPercent + '%';
@@ -598,6 +710,26 @@
 
             wrapper.classList.add('animate-shake');
             setTimeout(() => wrapper.classList.remove('animate-shake'), 500);
+
+            if (window.liveQuestion38Answer) {
+                const penaltyCard = document.getElementById('kpi-penalty-card');
+                const penaltyValue = document.getElementById('kpi-penalty-value');
+                const penaltyDesc = document.getElementById('kpi-penalty-desc');
+                const liveMatch = window.liveQuestion38Answer === qaData[37].vilton;
+                penaltyCard.className = liveMatch
+                    ? 'bg-purple-50/90 border border-purple-200 rounded-2xl p-4 transition-all'
+                    : 'bg-amber-50/90 border border-amber-200 rounded-2xl p-4 transition-all';
+                penaltyValue.className = liveMatch
+                    ? 'text-2xl sm:text-3xl font-extrabold text-softPurple mt-1'
+                    : 'text-2xl sm:text-3xl font-extrabold text-amber-700 mt-1';
+                penaltyValue.innerText = '0 pt';
+                penaltyDesc.className = liveMatch
+                    ? 'text-[11px] text-purple-700 mt-1 leading-snug'
+                    : 'text-[11px] text-amber-700 mt-1 leading-snug';
+                penaltyDesc.innerText = liveMatch
+                    ? 'Bia respondeu ao vivo e deu match! 💜'
+                    : 'Bia respondeu ao vivo; desta vez foi diferente ✨';
+            }
         }
 
         // Alterna o simulador da pergunta #38
@@ -667,12 +799,17 @@
                 } else if (item.type === 'diff') {
                     cardBorder = 'border-amber-200/70';
                     badgeStyle = 'bg-amber-100 text-amber-800';
-                } else if (item.type === 'penalty') {
-                    if (isSimulated) {
+                } else                 if (item.type === 'penalty') {
+                    if (window.liveQuestion38Answer || isSimulated) {
                         cardBorder = 'border-purple-200';
                         badgeStyle = 'bg-purple-100 text-purple-800';
-                        badgeText = 'Simulado: Match! 💜';
-                        biaAnswerText = 'Dançar com uma paixão em uma balada lotada (Simulado)';
+                        const liveMatch = window.liveQuestion38Answer === item.vilton;
+                        badgeText = window.liveQuestion38Answer
+                            ? (liveMatch ? 'Match ao vivo! 💜' : 'Respondida ao vivo ✨')
+                            : 'Simulado: Match! 💜';
+                        biaAnswerText = window.liveQuestion38Answer
+                            ? window.liveQuestion38Answer
+                            : 'Dançar com uma paixão em uma balada lotada (Simulado)';
                     } else {
                         cardBorder = 'border-rose-300 bg-rose-50/30';
                         badgeStyle = 'bg-rose-600 text-white';
@@ -861,6 +998,374 @@
                 animateThermometer(getStats().percentage);
             }, 300);
         };
+    </script>
+
+    <!-- Firebase Realtime Database: configuração e recursos do Espaço Ao Vivo -->
+    <script type="module">
+        /*
+         * Cole aqui os dados do seu app Web do Firebase.
+         * No console do Firebase: Configurações do projeto > Seus apps > SDK setup.
+         * Enquanto os placeholders estiverem assim, o site continua funcionando no modo offline.
+         */
+        const firebaseConfig = {
+            apiKey: 'API_KEY',
+            authDomain: 'PROJECT_ID.firebaseapp.com',
+            databaseURL: 'https://termometro-bia-vilton-default-rtdb.firebaseio.com/',
+            projectId: 'PROJECT_ID',
+            storageBucket: 'PROJECT_ID.firebasestorage.app',
+            messagingSenderId: 'MESSAGING_SENDER_ID',
+            appId: 'APP_ID'
+        };
+
+        const configuredValues = ['apiKey', 'projectId', 'appId', 'databaseURL'];
+        const firebaseConfigured = configuredValues.every(key =>
+            firebaseConfig[key] &&
+            !firebaseConfig[key].includes('PROJECT_ID') &&
+            !firebaseConfig[key].includes('API_KEY') &&
+            !firebaseConfig[key].includes('APP_ID')
+        );
+        const liveStatus = document.getElementById('firebase-status');
+        const liveCanvas = document.getElementById('live-canvas');
+        const notesContainer = document.getElementById('live-notes');
+        const selectedIdentityKey = 'biasite-live-identity';
+        let currentIdentity = localStorage.getItem(selectedIdentityKey) || 'Vilton';
+        let database = null;
+        let canvasContext = null;
+        let isDrawing = false;
+        let lastPoint = null;
+        let liveStrokes = [];
+        const pageLoadedAt = Date.now();
+        let firebaseSdk = null;
+        let activePresenceIdentity = null;
+
+        window.liveQuestion38Answer = null;
+
+        function setButtonState(button, active) {
+            button.className = active
+                ? 'px-4 py-2 rounded-lg text-xs font-bold transition-all bg-roseDeep text-white shadow-sm'
+                : 'px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-600 hover:text-roseDeep';
+        }
+
+        function updateIdentityUi() {
+            setButtonState(document.getElementById('identity-vilton'), currentIdentity === 'Vilton');
+            setButtonState(document.getElementById('identity-bia'), currentIdentity === 'Bia');
+            document.getElementById('heart-target').innerText = currentIdentity === 'Bia' ? 'Vilton' : 'Bia';
+        }
+
+        window.selectIdentity = function(identity) {
+            if (identity !== 'Bia' && identity !== 'Vilton') return;
+            currentIdentity = identity;
+            localStorage.setItem(selectedIdentityKey, identity);
+            updateIdentityUi();
+            if (database) {
+                if (activePresenceIdentity && activePresenceIdentity !== identity) {
+                    void firebaseSdk.set(firebaseSdk.ref(database, `presence/${activePresenceIdentity}`), false);
+                }
+                registerPresence();
+            }
+        };
+
+        function updatePresence(identity, online) {
+            const element = document.getElementById(`presence-${identity.toLowerCase()}`);
+            element.innerText = `${identity} está ${online ? 'online agora 🟢' : 'offline ⚪'}`;
+            element.className = online
+                ? 'px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-700'
+                : 'px-3 py-1.5 rounded-full bg-slate-100 text-slate-500';
+        }
+
+        function registerPresence() {
+            activePresenceIdentity = currentIdentity;
+            const connectedRef = firebaseSdk.ref(database, '.info/connected');
+            const presenceRef = firebaseSdk.ref(database, `presence/${currentIdentity}`);
+            firebaseSdk.onValue(connectedRef, snapshot => {
+                if (snapshot.val() === true) {
+                    firebaseSdk.onDisconnect(presenceRef).set(false);
+                    firebaseSdk.set(presenceRef, true);
+                }
+            });
+        }
+
+        function updateLiveAnswerUi() {
+            const answer = window.liveQuestion38Answer;
+            const status = document.getElementById('live-answer-status');
+            status.innerText = answer
+                ? `Resposta salva: ${answer} 💞`
+                : 'Aguardando a resposta da Bia...';
+            document.querySelectorAll('.live-answer-btn').forEach(button => {
+                const active = answer === button.dataset.liveAnswer;
+                button.classList.toggle('ring-2', active);
+                button.classList.toggle('ring-roseDeep', active);
+                button.classList.toggle('bg-rose-100', active);
+            });
+        }
+
+        window.saveLiveAnswer = async function(answer) {
+            if (!database) {
+                showToast('Configure o Firebase para desbloquear a pergunta ao vivo.');
+                return;
+            }
+            if (currentIdentity !== 'Bia') {
+                showToast('Selecione o modo Bia para responder a #38.');
+                return;
+            }
+            try {
+                await firebaseSdk.set(firebaseSdk.ref(database, 'live/question38'), answer);
+            } catch (error) {
+                console.error('Não foi possível salvar a resposta ao vivo.', error);
+                showToast('Não foi possível salvar a resposta agora.');
+            }
+        };
+
+        window.resetLiveAnswer = async function() {
+            if (!database) {
+                showToast('Configure o Firebase para usar o reset ao vivo.');
+                return;
+            }
+            try {
+                await firebaseSdk.set(firebaseSdk.ref(database, 'live/question38'), null);
+            } catch (error) {
+                console.error('Não foi possível resetar a pergunta ao vivo.', error);
+                showToast('Não foi possível resetar a pergunta agora.');
+            }
+        };
+
+        function animateLiveHearts(sender) {
+            for (let index = 0; index < 18; index += 1) {
+                const heart = document.createElement('span');
+                heart.className = 'live-heart text-2xl sm:text-3xl';
+                heart.innerText = ['💖', '💕', '💗', '❤️'][index % 4];
+                heart.style.left = `${Math.random() * 96 + 2}vw`;
+                heart.style.animationDelay = `${Math.random() * 0.7}s`;
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 2800);
+            }
+            showToast(`${sender} mandou uma chuva de corações! 💖`);
+        }
+
+        window.sendLiveHearts = async function() {
+            if (!database) {
+                showToast('Configure o Firebase para enviar carinho ao vivo.');
+                return;
+            }
+            try {
+                await firebaseSdk.push(firebaseSdk.ref(database, 'live/hearts'), {
+                    sender: currentIdentity,
+                    timestamp: Date.now()
+                });
+                await firebaseSdk.runTransaction(firebaseSdk.ref(database, 'live/heartsCount'), count => (count || 0) + 1);
+            } catch (error) {
+                console.error('Não foi possível enviar carinho ao vivo.', error);
+                showToast('Não foi possível enviar carinho agora.');
+            }
+        };
+
+        function resizeCanvas() {
+            const rect = liveCanvas.getBoundingClientRect();
+            const ratio = window.devicePixelRatio || 1;
+            liveCanvas.width = Math.max(1, Math.floor(rect.width * ratio));
+            liveCanvas.height = Math.max(1, Math.floor(rect.height * ratio));
+            canvasContext = liveCanvas.getContext('2d');
+            canvasContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+            renderCanvas();
+        }
+
+        function renderCanvas() {
+            if (!canvasContext) return;
+            const width = liveCanvas.clientWidth;
+            const height = liveCanvas.clientHeight;
+            canvasContext.clearRect(0, 0, width, height);
+            liveStrokes.forEach(stroke => {
+                canvasContext.beginPath();
+                canvasContext.moveTo(stroke.x1 * width, stroke.y1 * height);
+                canvasContext.lineTo(stroke.x2 * width, stroke.y2 * height);
+                canvasContext.strokeStyle = stroke.color;
+                canvasContext.lineWidth = stroke.width || 3;
+                canvasContext.lineCap = 'round';
+                canvasContext.stroke();
+            });
+        }
+
+        function canvasPoint(event) {
+            const rect = liveCanvas.getBoundingClientRect();
+            return {
+                x: Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)),
+                y: Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height))
+            };
+        }
+
+        function drawLocalSegment(from, to, color) {
+            const width = liveCanvas.clientWidth;
+            const height = liveCanvas.clientHeight;
+            canvasContext.beginPath();
+            canvasContext.moveTo(from.x * width, from.y * height);
+            canvasContext.lineTo(to.x * width, to.y * height);
+            canvasContext.strokeStyle = color;
+            canvasContext.lineWidth = 3;
+            canvasContext.lineCap = 'round';
+            canvasContext.stroke();
+        }
+
+        function finishDrawing(event) {
+            if (!isDrawing) return;
+            isDrawing = false;
+            lastPoint = null;
+        }
+
+        async function syncCanvasSegment(from, to) {
+            try {
+                await firebaseSdk.push(firebaseSdk.ref(database, 'live/board/strokes'), {
+                    x1: from.x,
+                    y1: from.y,
+                    x2: to.x,
+                    y2: to.y,
+                    color: document.getElementById('live-color').value,
+                    width: 3,
+                    author: currentIdentity,
+                    timestamp: Date.now()
+                });
+            } catch (error) {
+                console.error('Não foi possível sincronizar o rabisco.', error);
+                showToast('Não foi possível sincronizar este rabisco.');
+            }
+        }
+
+        window.clearLiveCanvas = async function() {
+            if (!database) {
+                showToast('Configure o Firebase para usar o quadro compartilhado.');
+                return;
+            }
+            try {
+                await firebaseSdk.set(firebaseSdk.ref(database, 'live/board/strokes'), null);
+            } catch (error) {
+                console.error('Não foi possível limpar o quadro.', error);
+                showToast('Não foi possível limpar o quadro agora.');
+            }
+        };
+
+        function escapeHtml(value) {
+            return value.replace(/[&<>"']/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+            }[character]));
+        }
+
+        function renderNotes(notes) {
+            const entries = Object.values(notes || {}).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            notesContainer.innerHTML = entries.length
+                ? entries.slice(0, 20).map(note => `
+                    <article class="rounded-xl bg-white border border-pink-100 p-2.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <strong class="text-[11px] text-roseDeep">${escapeHtml(note.author || 'Visitante')}</strong>
+                            <time class="text-[10px] text-slate-400">${new Date(note.timestamp || Date.now()).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</time>
+                        </div>
+                        <p class="text-xs text-slate-700 mt-1 break-words">${escapeHtml(note.message || '')}</p>
+                    </article>
+                `).join('')
+                : '<p class="text-xs text-slate-400 italic">Nenhum bilhete ainda.</p>';
+        }
+
+        async function publishNote(event) {
+            event.preventDefault();
+            const input = document.getElementById('live-note-message');
+            const message = input.value.trim();
+            if (!message) return;
+            if (!database) {
+                showToast('Configure o Firebase para publicar bilhetes ao vivo.');
+                return;
+            }
+            try {
+                await firebaseSdk.push(firebaseSdk.ref(database, 'live/notes'), {
+                    author: currentIdentity,
+                    message,
+                    timestamp: Date.now()
+                });
+                input.value = '';
+            } catch (error) {
+                console.error('Não foi possível publicar o bilhete.', error);
+                showToast('Não foi possível publicar o bilhete agora.');
+            }
+        }
+
+        function initializeLiveFirebase() {
+            updateIdentityUi();
+            updateLiveAnswerUi();
+            resizeCanvas();
+            liveCanvas.addEventListener('pointerdown', event => {
+                if (!database) return;
+                isDrawing = true;
+                lastPoint = canvasPoint(event);
+                liveCanvas.setPointerCapture(event.pointerId);
+            });
+            liveCanvas.addEventListener('pointermove', event => {
+                if (!isDrawing || !lastPoint) return;
+                const nextPoint = canvasPoint(event);
+                const previousPoint = lastPoint;
+                drawLocalSegment(previousPoint, nextPoint, document.getElementById('live-color').value);
+                lastPoint = nextPoint;
+                void syncCanvasSegment(previousPoint, nextPoint);
+            });
+            liveCanvas.addEventListener('pointerup', finishDrawing);
+            liveCanvas.addEventListener('pointercancel', finishDrawing);
+            window.addEventListener('resize', resizeCanvas);
+            document.getElementById('live-note-form').addEventListener('submit', publishNote);
+
+            if (!firebaseConfigured) {
+                liveStatus.innerText = 'Modo offline: cole suas credenciais do Firebase no script para ativar os recursos ao vivo.';
+                return;
+            }
+
+            try {
+                database = firebaseSdk.getDatabase(firebaseSdk.initializeApp(firebaseConfig));
+                liveStatus.innerText = 'Conectado ao Espaço Ao Vivo 💞';
+                firebaseSdk.onValue(firebaseSdk.ref(database, '.info/connected'), snapshot => {
+                    liveStatus.innerText = snapshot.val() === true
+                        ? 'Conectado ao Espaço Ao Vivo 💞'
+                        : 'Reconectando ao Espaço Ao Vivo...';
+                });
+                ['Bia', 'Vilton'].forEach(identity => {
+                    firebaseSdk.onValue(firebaseSdk.ref(database, `presence/${identity}`), snapshot => updatePresence(identity, snapshot.val() === true));
+                });
+                registerPresence();
+                firebaseSdk.onValue(firebaseSdk.ref(database, 'live/question38'), snapshot => {
+                    window.liveQuestion38Answer = snapshot.val() || null;
+                    updateLiveAnswerUi();
+                    renderQuestions();
+                    animateThermometer(getStats().percentage);
+                });
+                firebaseSdk.onValue(firebaseSdk.ref(database, 'live/heartsCount'), snapshot => {
+                    document.getElementById('hearts-count').innerText = snapshot.val() || 0;
+                });
+                firebaseSdk.onValue(firebaseSdk.ref(database, 'live/hearts'), snapshot => {
+                    snapshot.forEach(child => {
+                        const heart = child.val();
+                        if (heart && heart.timestamp > pageLoadedAt) animateLiveHearts(heart.sender || 'Alguém');
+                    });
+                });
+                firebaseSdk.onValue(firebaseSdk.ref(database, 'live/board/strokes'), snapshot => {
+                    liveStrokes = Object.values(snapshot.val() || {});
+                    renderCanvas();
+                });
+                firebaseSdk.onValue(firebaseSdk.query(
+                    firebaseSdk.ref(database, 'live/notes'),
+                    firebaseSdk.orderByChild('timestamp'),
+                    firebaseSdk.limitToLast(20)
+                ), snapshot => renderNotes(snapshot.val()));
+            } catch (error) {
+                console.error('Falha ao inicializar o Firebase Realtime Database.', error);
+                liveStatus.innerText = 'Não foi possível conectar ao Firebase. O restante do site continua funcionando.';
+            }
+        }
+
+        try {
+            const [appModule, databaseModule] = await Promise.all([
+                import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
+                import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js')
+            ]);
+            firebaseSdk = { ...appModule, ...databaseModule };
+        } catch (error) {
+            console.error('Não foi possível carregar o SDK do Firebase.', error);
+        }
+
+        initializeLiveFirebase();
     </script>
 </body>
 </html>

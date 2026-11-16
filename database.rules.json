@@ -1,0 +1,50 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "presence": {
+      "$identity": {
+        ".read": true,
+        ".write": "$identity === 'Bia' || $identity === 'Vilton'",
+        ".validate": "newData.isBoolean()"
+      }
+    },
+    "live": {
+      "question38": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.val() === null || newData.val() === 'Dançar com uma paixão em uma balada lotada' || newData.val() === 'Uma dança lenta em particular'"
+      },
+      "hearts": {
+        "$heartId": {
+          ".read": true,
+          ".write": true,
+          ".validate": "newData.hasChildren(['sender', 'timestamp']) && newData.child('sender').isString() && newData.child('sender').val().length <= 20 && newData.child('timestamp').isNumber()"
+        }
+      },
+      "heartsCount": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.isNumber() && newData.val() >= 0"
+      },
+      "board": {
+        "strokes": {
+          ".read": true,
+          ".write": true,
+          "$strokeId": {
+            ".read": true,
+            ".write": true,
+            ".validate": "newData.hasChildren(['x1', 'y1', 'x2', 'y2', 'color', 'width', 'author', 'timestamp']) && newData.child('x1').isNumber() && newData.child('y1').isNumber() && newData.child('x2').isNumber() && newData.child('y2').isNumber() && newData.child('color').isString() && newData.child('author').isString() && newData.child('timestamp').isNumber()"
+          }
+        }
+      },
+      "notes": {
+        "$noteId": {
+          ".read": true,
+          ".write": true,
+          ".validate": "newData.hasChildren(['author', 'message', 'timestamp']) && newData.child('author').isString() && newData.child('author').val().length <= 20 && newData.child('message').isString() && newData.child('message').val().length > 0 && newData.child('message').val().length <= 240 && newData.child('timestamp').isNumber()"
+        }
+      }
+    }
+  }
+}
