@@ -353,7 +353,7 @@
                             id="photo-1"
                             src="./assets/DSC06341.JPG"
                             alt="Bia e Vilton sorrindo juntos no bar com letreiro neon Mais cerveja, por favor!"
-                            data-caption="Sorrindo juntos — 'bora beber!' 🍻✨"
+                            data-caption="Mais cerveja, por favor! 🍻✨"
                             data-filename="DSC06341.JPG"
                             onerror="handleImageError(this)"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -378,8 +378,7 @@
 
                     <div class="mt-4 px-1 flex items-center justify-between gap-2">
                         <div>
-                            <p class="font-serif italic text-base sm:text-lg font-bold text-slate-800">
-                                "Mais cerveja, por favor!" 🍻✨
+                            <p id="caption-photo-1" class="font-serif italic text-base sm:text-lg font-bold text-slate-800">
                             </p>
                             <p class="text-[11px] text-slate-400 font-medium mt-0.5">
                                 la Birra • <span class="font-mono">DSC06341.JPG</span>
@@ -399,7 +398,7 @@
                             id="photo-2"
                             src="./assets/DSC06452.JPG"
                             alt="Bia e Vilton embaixo de um arco iluminado em formato de coração cheio de flores"
-                            data-caption="te amo nega 💘🌿"
+                            data-caption="Arco de coração & flores 💘🌿"
                             data-filename="DSC06452.JPG"
                             onerror="handleImageError(this)"
                             class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
@@ -424,8 +423,7 @@
 
                     <div class="mt-4 px-1 flex items-center justify-between gap-2">
                         <div>
-                            <p class="font-serif italic text-base sm:text-lg font-bold text-slate-800">
-                                "Arco de coração & flores" 💘🌿
+                            <p id="caption-photo-2" class="font-serif italic text-base sm:text-lg font-bold text-slate-800">
                             </p>
                             <p class="text-[11px] text-slate-400 font-medium mt-0.5">
                                 Floribal • <span class="font-mono">DSC06452.JPG</span>
@@ -883,6 +881,15 @@
             document.body.style.overflow = 'hidden';
         }
 
+        function syncPhotoCaptions() {
+            document.querySelectorAll('[data-caption]').forEach(imgEl => {
+                const captionEl = document.getElementById('caption-' + imgEl.id);
+                if (captionEl) {
+                    captionEl.textContent = imgEl.dataset.caption || '';
+                }
+            });
+        }
+
         function closeLightbox() {
             const lightbox = document.getElementById('photo-lightbox');
             lightbox.classList.add('hidden');
@@ -899,6 +906,7 @@
         // Inicializa a página já com os dados calculados
         window.onload = function() {
             initAmbientHearts();
+            syncPhotoCaptions();
             renderQuestions();
             setTimeout(() => {
                 animateThermometer(getStats().percentage);
