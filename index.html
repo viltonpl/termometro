@@ -326,17 +326,8 @@
                         Química na prática: Bia & Vilton
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                        Clique em qualquer foto para ampliar • Caminhos configurados para <code class="px-1.5 py-0.5 rounded bg-pink-50 text-roseDeep font-mono text-xs">./assets/</code> no GitHub
+                        Clique em qualquer foto para ampliar
                     </p>
-                </div>
-
-                <!-- Botão discreto para testar fotos localmente antes de subir no GitHub -->
-                <div class="flex items-center gap-2 self-start sm:self-center">
-                    <input type="file" id="local-photo-input" accept="image/*" class="hidden" onchange="handleLocalPhotoPreview(event)">
-                    <button onclick="triggerLocalPhotoTest()" class="px-3.5 py-2 rounded-xl bg-white border border-pink-200 text-xs font-bold text-slate-600 hover:text-roseDeep hover:border-roseDeep transition-all cursor-pointer flex items-center gap-1.5 shadow-sm" title="Permite carregar uma foto do seu dispositivo para testar o layout antes de subir no GitHub">
-                        <span>🖼️</span>
-                        <span>Testar foto local</span>
-                    </button>
                 </div>
             </div>
 
@@ -352,8 +343,8 @@
                         <img
                             id="photo-1"
                             src="./assets/DSC06341.JPG"
-                            alt="Bia e Vilton sorrindo juntos no bar com letreiro neon Mais cerveja, por favor!"
-                            data-caption="bora beber! 🍻✨"
+                            alt="Bia e Vilton sorrindo juntos no bar com letreiro neon Bora beber? 🍻✨"
+                            data-caption="adoro te ver sorrindo, bixa linda"
                             data-filename="DSC06341.JPG"
                             onerror="handleImageError(this)"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -365,9 +356,6 @@
                             <p class="text-[11px] text-slate-500 mt-1 max-w-xs">
                                 Ao subir a pasta <code class="font-mono">assets/</code> no GitHub, esta foto aparecerá automaticamente aqui.
                             </p>
-                            <button type="button" onclick="event.stopPropagation(); triggerLocalPhotoTest('photo-1')" class="mt-3 px-3 py-1.5 rounded-lg bg-roseDeep text-white text-[11px] font-bold shadow-sm hover:bg-rose-700 transition-colors cursor-pointer">
-                                Pré-visualizar DSC06341.JPG agora
-                            </button>
                         </div>
 
                         <!-- Selo de zoom no hover -->
@@ -398,7 +386,7 @@
                             id="photo-2"
                             src="./assets/DSC06452.JPG"
                             alt="Bia e Vilton embaixo de um arco iluminado em formato de coração cheio de flores"
-                            data-caption="Arco de coração & flores 💘🌿"
+                            data-caption="combinandinhos 💘🌿"
                             data-filename="DSC06452.JPG"
                             onerror="handleImageError(this)"
                             class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
@@ -410,9 +398,6 @@
                             <p class="text-[11px] text-slate-500 mt-1 max-w-xs">
                                 Ao subir a pasta <code class="font-mono">assets/</code> no GitHub, esta foto aparecerá automaticamente aqui.
                             </p>
-                            <button type="button" onclick="event.stopPropagation(); triggerLocalPhotoTest('photo-2')" class="mt-3 px-3 py-1.5 rounded-lg bg-softPurple text-white text-[11px] font-bold shadow-sm hover:bg-purple-700 transition-colors cursor-pointer">
-                                Pré-visualizar DSC06452.JPG agora
-                            </button>
                         </div>
 
                         <!-- Selo de zoom no hover -->
@@ -819,8 +804,6 @@
         }
 
         // Controle da Galeria Polaroid, Fallback & Lightbox
-        let targetPhotoIdForPreview = 'photo-1';
-
         function handleImageError(imgElement) {
             imgElement.classList.add('hidden');
             const fallbackEl = document.getElementById('fallback-' + imgElement.id);
@@ -829,42 +812,10 @@
             }
         }
 
-        function triggerLocalPhotoTest(photoId) {
-            if (photoId) {
-                targetPhotoIdForPreview = photoId;
-            } else {
-                // Alterna entre photo-1 e photo-2 se clicado no botão geral
-                const p1Hidden = document.getElementById('photo-1').classList.contains('hidden');
-                targetPhotoIdForPreview = p1Hidden ? 'photo-1' : 'photo-2';
-            }
-            document.getElementById('local-photo-input').click();
-        }
-
-        function handleLocalPhotoPreview(event) {
-            const file = event.target.files && event.target.files[0];
-            if (!file) return;
-
-            const objectUrl = URL.createObjectURL(file);
-            const imgEl = document.getElementById(targetPhotoIdForPreview);
-            const fallbackEl = document.getElementById('fallback-' + targetPhotoIdForPreview);
-
-            if (imgEl) {
-                imgEl.src = objectUrl;
-                imgEl.classList.remove('hidden');
-            }
-            if (fallbackEl) {
-                fallbackEl.classList.add('hidden');
-            }
-
-            showToast(`Pré-visualização carregada (${file.name})! 📸`);
-            event.target.value = '';
-        }
-
         function openLightbox(photoId) {
             const imgEl = document.getElementById(photoId);
             // Não abre o modal se a foto ainda estiver no estado de fallback sem imagem carregada
             if (!imgEl || imgEl.classList.contains('hidden')) {
-                triggerLocalPhotoTest(photoId);
                 return;
             }
 
